@@ -31,30 +31,3 @@ Copy le.pkl to PestClassification and create folder models, copy 2 file `.hdf5` 
 ### Step 5 : 
 
 Open Terminal, run command `python server.py`
-
-## Demo
-
-<p align="center">
-  <img src="images/demo.png"><br/>
-  <i>Data Sample</i>
-</p>
-<p align="center">
-  <img src="images/evaluate.png"><br/>
-  <i>Result Evaluate</i>
-</p>
-<p align="center">
-  <img src="images/main.png"><br/>
-  <i>Main Screen</i>
-</p>
-<p align="center">
-  <img src="images/choose_model.png"><br/>
-  <i>Choose Model</i>
-</p>
-<p align="center">
-  <img src="images/choose_img.png"><br/>
-  <i>Choose Image</i>
-</p>
-<p align="center">
-  <img src="images/result.png"><br/>
-  <i>Result</i>
-</p>
