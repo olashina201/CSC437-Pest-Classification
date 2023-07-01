@@ -3,68 +3,86 @@ from keras.models import load_model
 import os
 import cv2
 import config
-
 import numpy as np
 
-# Khởi tạo Flask
 app = Flask(__name__)
 
-model_vgg16 = load_model(os.path.join("models","VGG16-w-max.hdf5"))
-model_resnet50 = load_model(os.path.join("models","ResNet50-w-max.hdf5"))
-model_inceptionv3 = load_model(os.path.join("models","ICT-w-last.hdf5"))
+# Load models
+model_paths = {
+    'VGG16': os.path.join('models', 'VGG16-w-max.hdf5'),
+    'Resnet50': os.path.join('models', 'ResNet50-w-max.hdf5'),
+    'Inception-v3': os.path.join('models', 'ICT-w-last.hdf5')
+}
 
-import pickle
-file = open('le.pkl','rb')
-le = pickle.load(file)
-file.close()
+loaded_models = {}
+for model_name, model_path in model_paths.items():
+    loaded_models[model_name] = load_model(model_path)
+
+# Load label encoder
+with open('le.pkl', 'rb') as file:
+    le = pickle.load(file)
+
+
+def process_image(image):
+    # Resize image
+    frame = cv2.resize(image, dsize=(config.image_size, config.image_size))
+    # Convert to tensor format
+    frame = np.expand_dims(frame, axis=0)
+    return frame
+
+
+def predict_image(image, model):
+    predict = model.predict(image)
+    list_pred = np.argsort(predict)
+    predict_name = le.inverse_transform([np.argmax(predict)])[0]
+    more = "{} : {:.2f}%; {} : {:.2f}%; {} : {:.2f}%".format(
+        le.inverse_transform([np.argmax(predict)])[0],
+        predict[0][list_pred[0][-1]] * 100,
+        le.inverse_transform([list_pred[0][-2]])[0],
+        predict[0][list_pred[0][-2]] * 100,
+        le.inverse_transform([list_pred[0][-3]])[0],
+        predict[0][list_pred[0][-3]] * 100
+    )
+    return predict_name, more
+
 
 @app.route("/", methods=['GET', 'POST'])
 def home_page():
     if request.method == "POST":
         try:
-            # get file gui len
-            image = request.files['file']
-            if image:
-                #luu file
-                path_to_save = os.path.join("static/file",image.filename)
-                print("Save = ", path_to_save)
-                image.save(path_to_save)
+            # Get uploaded file
+            image_file = request.files['file']
+            if image_file:
+                # Save file
+                path_to_save = os.path.join("static/file", image_file.filename)
+                image_file.save(path_to_save)
 
-                #doc anh, resize ve kich thuoc cua input model
+                # Read image
                 frame = cv2.imread(path_to_save)
-                frame = cv2.resize(frame, dsize = (config.image_size, config.image_size))
-                #convert thanh dang tensor
-                frame = np.expand_dims(frame, axis=0)
+                processed_image = process_image(frame)
 
-                #run model 
-                if request.form.get("models") == "VGG16":
-                    predict = model_vgg16.predict(frame)
-                    print("VGG16")
-                elif request.form.get("models") == "Resnet50":
-                    predict = model_resnet50.predict(frame)
-                    print("Resnet50")
+                # Run selected model
+                selected_model = request.form.get("models")
+                if selected_model in loaded_models:
+                    predict_name, more = predict_image(
+                        processed_image, loaded_models[selected_model])
                 else:
-                    predict = model_inceptionv3.predict(frame)
-                    print("Inception v3")
+                    return render_template('index.html', msg='Invalid model selection')
 
-                list_pred = np.argsort(predict)
-                more = "{} : {:.2f}%; {} : {:.2f}%; {} : {:.2f}%".format(le.inverse_transform([np.argmax(predict)])[0],predict[0][list_pred[0][-1]]*100,le.inverse_transform([list_pred[0][-2]])[0],predict[0][list_pred[0][-2]]*100,le.inverse_transform([list_pred[0][-3]])[0],predict[0][list_pred[0][-3]]*100)
-                predict_name = le.inverse_transform([np.argmax(predict)])[0]
-
-                return render_template("index.html", 
-                        image = image.filename, 
-                        msg="Tải lên thành công", 
-                        models=request.form.get("models"),
-                        predict_name=predict_name,
-                        more=more)
+                return render_template("index.html",
+                                       image=image_file.filename,
+                                       msg="Upload successful",
+                                       models=selected_model,
+                                       predict_name=predict_name,
+                                       more=more)
             else:
-                return render_template('index.html', msg='Hãy chọn file để tải lên')
+                return render_template('index.html', msg='Please choose a file to upload')
         except Exception as ex:
             print(ex)
-            return render_template('index.html', msg="Không nhận diện được hình ảnh!")
+            return render_template('index.html', msg="Failed to recognize the image!")
     else:
         return render_template('index.html')
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', debug = False)
+    app.run(host='0.0.0.0', debug=False)
