@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request
 from keras.models import load_model
 import os
+import pickle
 import cv2
 import config
 import numpy as np
@@ -9,9 +10,7 @@ app = Flask(__name__)
 
 # Load models
 model_paths = {
-    'VGG16': os.path.join('models', 'VGG16-w-max.hdf5'),
-    'Resnet50': os.path.join('models', 'ResNet50-w-max.hdf5'),
-    'Inception-v3': os.path.join('models', 'ICT-w-last.hdf5')
+    'VGG16': os.path.join('models', 'VGG16-f-w-max.hdf5'),
 }
 
 loaded_models = {}
@@ -20,7 +19,7 @@ for model_name, model_path in model_paths.items():
 
 # Load label encoder
 with open('le.pkl', 'rb') as file:
-    le = pickle.load(file)
+    le = pickle.loads(file)
 
 
 def process_image(image):
