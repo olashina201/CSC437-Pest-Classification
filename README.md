@@ -10,7 +10,7 @@ Using Transfer Learning with VGG16, Resnet50, Inception v3 and Flask Framework t
 
 Clone my project 
 
-`git clone https://github.com/thangnh1/PestClassification`
+`git clone https://github.com/olashina201/CSC437-Pest-Classification.git`
 
 ### Step 2 : 
 
@@ -22,11 +22,11 @@ Open with editor tool, install lib with terminal
 
 Train model (Recommend using Google Colab)
 
-Upload folder PestClassification/data to Google Drive, then Open 3 file from PestClassification/notebook/ with Google Colab, connect GPU and Run All 
+Upload folder CSC437-Pest-Classification/data to Google Drive, then Open 3 file from CSC437-Pest-Classification/notebook/ with Google Colab, connect GPU and Run All 
 
 ### Step 4 : 
 
-Copy le.pkl to PestClassification and create folder models, copy 2 file `.hdf5` from Google Drive to  PestClassification/models/ . You can test models with `predict.py` file or evaluate models with `score.py`
+Copy le.pkl to CSC437-Pest-Classification and create folder models, copy 2 file `.hdf5` from Google Drive to  PestClassification/models/ . You can test models with `predict.py` file or evaluate models with `score.py`
 
 ### Step 5 : 
 
