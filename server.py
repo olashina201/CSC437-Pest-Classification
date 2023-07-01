@@ -19,7 +19,7 @@ for model_name, model_path in model_paths.items():
 
 # Load label encoder
 with open('le.pkl', 'rb') as file:
-    le = pickle.loads(file)
+    le = pickle.load(file)
 
 
 def process_image(image):
